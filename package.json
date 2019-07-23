@@ -1,0 +1,38 @@
+{
+  "name": "hypersimple",
+  "version": "0.0.0",
+  "description": "The easiest way to use hyperHTML",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "unpkg": "min.js",
+  "scripts": {
+    "build": "npm run cjs && npm run rollup && npm run min && npm run size",
+    "cjs": "ascjs esm cjs",
+    "min": "echo '/*! (c) Andrea Giammarchi - ISC */' > min.js && uglifyjs index.js -c -m >> min.js",
+    "rollup": "rollup --config rollup.config.js && drop-babel-typeof index.js",
+    "size": "cat index.js | wc -c;cat min.js | wc -c;gzip -c9 min.js | wc -c"
+  },
+  "keywords": [
+    "hyperHTML",
+    "component",
+    "hooks",
+    "store"
+  ],
+  "author": "Andrea Giammarchi",
+  "license": "ISC",
+  "dependencies": {
+    "@ungap/assign": "^0.1.0",
+    "@ungap/weakmap": "^0.1.4",
+    "hyperhtml": "^2.30.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "ascjs": "^3.0.1",
+    "drop-babel-typeof": "^1.0.3",
+    "rollup": "^1.17.0",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "uglify-js": "^3.6.0"
+  }
+}
