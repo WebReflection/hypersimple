@@ -6,6 +6,12 @@ The easiest way to use [hyperHTML](https://github.com/WebReflection/hyperHTML#re
   * component implemented as callbacks
   * an entire model/props driven development
 
+- - -
+<sup>**Social Media Photo by [Juliana Malta](https://unsplash.com/@julianamalta) on [Unsplash](https://unsplash.com/)**</sup>
+
+![WebReflection status](https://offline.report/status/webreflection.svg) [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](https://opensource.org/licenses/ISC)
+
+
 #### Example
 
 [Live on Code Pen](https://codepen.io/WebReflection/pen/RXaWyR?editors=0010).
