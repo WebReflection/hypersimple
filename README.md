@@ -8,6 +8,8 @@ The easiest way to use [hyperHTML](https://github.com/WebReflection/hyperHTML#re
 
 #### Example
 
+[Live on Code Pen](https://codepen.io/WebReflection/pen/RXaWyR?editors=0010).
+
 ```js
 import {comp, html, render} from 'hypersimple';
 
