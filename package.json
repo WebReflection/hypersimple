@@ -34,5 +34,13 @@
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-node-resolve": "^5.2.0",
     "uglify-js": "^3.6.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WebReflection/hypersimple.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WebReflection/hypersimple/issues"
+  },
+  "homepage": "https://github.com/WebReflection/hypersimple#readme"
 }
