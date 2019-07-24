@@ -2,6 +2,7 @@
 const {wire} = require('hyperhtml');
 const assign = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/assign'));
 const WeakMap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/weakmap'));
+const {bound, same} = require('./utils.js');
 
 var defineProperty = Object.defineProperty;
 var gOPD = Object.getOwnPropertyDescriptor;
@@ -9,88 +10,80 @@ var keys = Object.keys;
 
 var counter = 0;
 var comps = new WeakMap;
-var props = new WeakMap;
+var model = new WeakMap;
 var store = new WeakMap;
-var wired = {id: 0, props: null};
+var wired = {id: 0, model: null};
 
-function bound(value, props) {
-  return typeof value === 'function' ? value.bind(props) : value;
-}
-
-function same(node, i) {
-  return this[i] === node[i];
-}
-
-function update(Component, self, args, id, props) {
+function update(Component, self, args, id, model) {
   var wid = wired.id;
-  var wprops = wired.props;
+  var wmodel = wired.model;
   wired.id = id;
-  wired.props = props;
+  wired.model = model;
   try {
     return Component.apply(self, args);
   }
   finally {
     wired.id = wid;
-    wired.props = wprops;
+    wired.model = wmodel;
   }
 }
 
 function comp(Component) {'use strict';
   var id = counter++;
-  component.update = function (props, changes) {
-    var update = store.get(props);
+  component.update = function (model, changes) {
+    var update = store.get(model);
     if (!update)
       throw new Error('unknown model');
     update(changes);
   };
   comps.set(component, id);
   return component;
-  function component(props) {
-    if (!props)
-      props = {};
+  function component(model) {
+    if (!model)
+      model = {};
     var args = arguments;
     var self = this;
     var sync = true;
-    if (!store.has(props)) {
-      store.set(props, function (changes) {
+    if (!store.has(model)) {
+      store.set(model, function (changes) {
         sync = false;
         try {
-          assign(props, changes);
+          assign(model, changes);
         }
         finally {
           sync = true;
-          update(Component, self, args, id, props);
+          update(Component, self, args, id, model);
         }
       });
-      keys(props).forEach(function (key) {
-        var value, desc = gOPD(props, key);
+      keys(model).forEach(function (key) {
+        var value, desc = gOPD(model, key);
         if (desc.configurable) {
           if ('value' in desc) {
-            value = bound(desc.value, props);
+            value = bound(desc.value, model);
             delete desc.value;
             delete desc.writable;
             desc.get = function () {
               return value;
             };
             desc.set = function ($) {
-              value = bound($, props);
+              value = bound($, model);
               if (sync)
-                update(Component, self, args, id, props);
+                update(Component, self, args, id, model);
             };
-            defineProperty(props, key, desc);
+            defineProperty(model, key, desc);
           } else if ('set' in desc) {
             value = desc.set;
             desc.set = function ($) {
-              value.call(props, $);
+              value.call(model, $);
               if (sync)
-                update(Component, self, args, id, props);
+                update(Component, self, args, id, model);
             };
-            defineProperty(props, key, desc);
+            defineProperty(model, key, desc);
           }
         }
       });
     }
-    return update(Component, self, args, id, props);
+    return update(Component, self, args, id, model);
   };
 }
 exports.comp = comp;
@@ -98,7 +91,7 @@ exports.comp = comp;
 function render(where, Component) {
   var known = comps.has(Component);
   var content = known ?
-    Component(props.get(where) || props.set(where, {}).get(where)) :
+    Component(model.get(where) || model.set(where, {}).get(where)) :
     Component();
   var isElement = content.nodeType === 1;
   if (!(
@@ -113,11 +106,11 @@ function render(where, Component) {
 exports.render = render;
 
 function html() {
-  return wire(wired.props, 'html:' + wired.id).apply(null, arguments);
+  return wire(wired.model, 'html:' + wired.id).apply(null, arguments);
 }
 exports.html = html;
 
 function svg() {
-  return wire(wired.props, 'svg:' + wired.id).apply(null, arguments);
+  return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
 }
 exports.svg = svg;

@@ -1874,37 +1874,36 @@ var hypersimple = (function (exports) {
     return target;
   };
 
+  function bound(value, model) {
+    return typeof value === 'function' ? value.bind(model) : value;
+  }
+  function same(node, i) {
+    return this[i] === node[i];
+  }
+
   var defineProperty = Object.defineProperty;
   var gOPD = Object.getOwnPropertyDescriptor;
   var keys$1 = Object.keys;
   var counter = 0;
   var comps = new WeakMap$1();
-  var props = new WeakMap$1();
+  var model = new WeakMap$1();
   var store = new WeakMap$1();
   var wired = {
     id: 0,
-    props: null
+    model: null
   };
 
-  function bound(value, props) {
-    return typeof value === 'function' ? value.bind(props) : value;
-  }
-
-  function same(node, i) {
-    return this[i] === node[i];
-  }
-
-  function update(Component, self, args, id, props) {
+  function update(Component, self, args, id, model) {
     var wid = wired.id;
-    var wprops = wired.props;
+    var wmodel = wired.model;
     wired.id = id;
-    wired.props = props;
+    wired.model = model;
 
     try {
       return Component.apply(self, args);
     } finally {
       wired.id = wid;
-      wired.props = wprops;
+      wired.model = wmodel;
     }
   }
 
@@ -1912,8 +1911,8 @@ var hypersimple = (function (exports) {
 
     var id = counter++;
 
-    component.update = function (props, changes) {
-      var update = store.get(props);
+    component.update = function (model, changes) {
+      var update = store.get(model);
       if (!update) throw new Error('unknown model');
       update(changes);
     };
@@ -1921,30 +1920,30 @@ var hypersimple = (function (exports) {
     comps.set(component, id);
     return component;
 
-    function component(props) {
-      if (!props) props = {};
+    function component(model) {
+      if (!model) model = {};
       var args = arguments;
       var self = this;
       var sync = true;
 
-      if (!store.has(props)) {
-        store.set(props, function (changes) {
+      if (!store.has(model)) {
+        store.set(model, function (changes) {
           sync = false;
 
           try {
-            assign(props, changes);
+            assign(model, changes);
           } finally {
             sync = true;
-            update(Component, self, args, id, props);
+            update(Component, self, args, id, model);
           }
         });
-        keys$1(props).forEach(function (key) {
+        keys$1(model).forEach(function (key) {
           var value,
-              desc = gOPD(props, key);
+              desc = gOPD(model, key);
 
           if (desc.configurable) {
             if ('value' in desc) {
-              value = bound(desc.value, props);
+              value = bound(desc.value, model);
               delete desc.value;
               delete desc.writable;
 
@@ -1953,31 +1952,31 @@ var hypersimple = (function (exports) {
               };
 
               desc.set = function ($) {
-                value = bound($, props);
-                if (sync) update(Component, self, args, id, props);
+                value = bound($, model);
+                if (sync) update(Component, self, args, id, model);
               };
 
-              defineProperty(props, key, desc);
+              defineProperty(model, key, desc);
             } else if ('set' in desc) {
               value = desc.set;
 
               desc.set = function ($) {
-                value.call(props, $);
-                if (sync) update(Component, self, args, id, props);
+                value.call(model, $);
+                if (sync) update(Component, self, args, id, model);
               };
 
-              defineProperty(props, key, desc);
+              defineProperty(model, key, desc);
             }
           }
         });
       }
 
-      return update(Component, self, args, id, props);
+      return update(Component, self, args, id, model);
     }
   }
   function render(where, Component) {
     var known = comps.has(Component);
-    var content = known ? Component(props.get(where) || props.set(where, {}).get(where)) : Component();
+    var content = known ? Component(model.get(where) || model.set(where, {}).get(where)) : Component();
     var isElement = content.nodeType === 1;
 
     if (!(isElement && where.firstChild === content || !isElement && content.childNodes.every(same, where.childNodes))) {
@@ -1988,10 +1987,10 @@ var hypersimple = (function (exports) {
     return where;
   }
   function html() {
-    return wire(wired.props, 'html:' + wired.id).apply(null, arguments);
+    return wire(wired.model, 'html:' + wired.id).apply(null, arguments);
   }
   function svg() {
-    return wire(wired.props, 'svg:' + wired.id).apply(null, arguments);
+    return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
   }
 
   exports.comp = comp;
