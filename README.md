@@ -66,5 +66,5 @@ The whole idea is indeed to abstract away everything that's more complicated tha
 
 ### TODO
 
-- [ ] relate models to components, so it's possible to use the same model with different components and still ahve the magic happens
+- [ ] relate models to components, so it's possible to use the same model with different components still providing same magic
 - [ ] evaluate the exposure of `hyperHTML.define(...)` to provide user-defined behaviors too
