@@ -51,18 +51,16 @@ render(document.body, () => App(model));
 
 ## API in a nutshell
 
-  * `comp(fn)` returns a component based on some `props` or `model` object
-  * the `fn` _must_ return the result of `html` or `svg`
+  * `comp(fn)` returns a component based on some `props` or `model` object. The `fn` _must_ return the result of `html` or `svg`
   * `html` and `svg` are a template literal tag that accept everything _hyperHTML_ can produce
   * `render(where, what)` will populate the content of a generic node with whatever a component returns
+  * `update(model[, {...changes}])` to update all components based on the same model and, eventually, batch all updates at once through changes
   * `define(...)` to enrich _hyperHTML_ potentials [as described in the documentation](https://viperhtml.js.org/hyperhtml/documentation/#api-3)
-
-A component can `Comp.update(model)` to explicitly update some part of the layout, or batch multiple updates at once via `Comp.update(model, {...changes})`.
 
 The `model` _will be modified_ to reflect any change of any of its properties in the UI, and every method will be automatically bound to the related context.
 
-A `model` _can be used with multiple components_ without needing to nest a sub object per each component related to the same model.
+A `model` _can be used with multiple components_ without needing to nest a sub model/object per each component related to the same model.
 
-If you use immutable structures, you'll trash the whole layout each time so ... to **keep it simple**, as the project suggest, but also to keep it memory safe, just pass mutable models and update those directly instead of duplicating it.
+If you use immutable structures, you'll trash the whole layout each time so ... to **keep it simple**, as the project suggests, but also to keep it memory safe, just pass mutable models and update those directly instead of duplicating references.
 
 The whole idea is indeed to abstract away everything that's more complicated than setting, or updating, a generic property.

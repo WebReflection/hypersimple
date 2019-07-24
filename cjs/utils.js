@@ -21,12 +21,7 @@ function svg() {
 }
 exports.svg = svg;
 
-function same(node, i) {
-  return this[i] === node[i];
-}
-exports.same = same;
-
-function update(model, Component, id, args) {
+function refresh(model, Component, id, args) {
   var wid = wired.id;
   var wmodel = wired.model;
   wired.id = id;
@@ -39,9 +34,14 @@ function update(model, Component, id, args) {
     wired.model = wmodel;
   }
 }
-exports.update = update;
+exports.refresh = refresh;
 
-function wrap(model, update) {
+function same(node, i) {
+  return this[i] === node[i];
+}
+exports.same = same;
+
+function augment(model, update) {
   keys(model).forEach(function (key) {
     var value, desc = gOPD(model, key);
     if (desc.configurable) {
@@ -69,7 +69,7 @@ function wrap(model, update) {
     }
   });
 }
-exports.wrap = wrap;
+exports.augment = augment;
 
 function bound(value, model) {
   return typeof value === 'function' ? value.bind(model) : value;

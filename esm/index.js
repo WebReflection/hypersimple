@@ -1,7 +1,7 @@
 import assign from '@ungap/assign';
 import WeakMap from '@ungap/weakmap';
 import Map from '@ungap/essential-map';
-import {define, html, svg, same, slice, update, wrap} from './utils.js';
+import {augment, define, html, svg, same, slice, refresh} from './utils.js';
 
 var comps = new WeakMap;
 var param = new WeakMap;
@@ -15,23 +15,10 @@ export {define, html, svg};
 export function comp(Component) {
   var id = ++ids;
   comps.set(component, id);
-  component.update = function (model, changes) {
-    var map = getMap(model);
-    if (!map)
-      throw new Error('unknown model');
-    try {
-      sync = false;
-      assign(model, changes);
-    }
-    finally {
-      sync = true;
-      map.forEach(updateComponent, model);
-    }
-  };
   return component;
   function component(model) {
     var info = getInfo(model || {}, component, Component, id, arguments);
-    return update(model, info.Component, info.id, info.args);
+    return refresh(model, info.Component, info.id, info.args);
   };
 };
 
@@ -48,6 +35,20 @@ export function render(where, comp) {
     where.appendChild(content.valueOf(true));
   }
   return where;
+};
+
+export function update(model, changes) {
+  var map = getMap(model);
+  if (!map)
+    throw new Error('unknown model');
+  try {
+    sync = false;
+    assign(model, changes);
+  }
+  finally {
+    sync = true;
+    map.forEach(updateComponent, model);
+  }
 };
 
 function getInfo(model, comp, Component, id, args) {
@@ -69,7 +70,7 @@ function setInfo(map, comp, Component, id, args) {
 function setMap(model) {
   var map = new Map;
   store.set(model, map);
-  wrap(model, updateAll);
+  augment(model, updateAll);
   return map;
 }
 
@@ -79,5 +80,5 @@ function updateAll(model) {
 }
 
 function updateComponent(info) {
-  update(this, info.Component, info.id, info.args);
+  refresh(this, info.Component, info.id, info.args);
 }

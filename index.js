@@ -2042,10 +2042,7 @@ var hypersimple = (function (exports) {
   function svg() {
     return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
   }
-  function same(node, i) {
-    return this[i] === node[i];
-  }
-  function update(model, Component, id, args) {
+  function refresh(model, Component, id, args) {
     var wid = wired.id;
     var wmodel = wired.model;
     wired.id = id;
@@ -2058,7 +2055,10 @@ var hypersimple = (function (exports) {
       wired.model = wmodel;
     }
   }
-  function wrap(model, update) {
+  function same(node, i) {
+    return this[i] === node[i];
+  }
+  function augment(model, update) {
     keys$1(model).forEach(function (key) {
       var value,
           desc = gOPD(model, key);
@@ -2103,25 +2103,11 @@ var hypersimple = (function (exports) {
   function comp(Component) {
     var id = ++ids;
     comps.set(component, id);
-
-    component.update = function (model, changes) {
-      var map = getMap(model);
-      if (!map) throw new Error('unknown model');
-
-      try {
-        sync = false;
-        assign(model, changes);
-      } finally {
-        sync = true;
-        map.forEach(updateComponent, model);
-      }
-    };
-
     return component;
 
     function component(model) {
       var info = getInfo(model || {}, component, Component, id, arguments);
-      return update(model, info.Component, info.id, info.args);
+      return refresh(model, info.Component, info.id, info.args);
     }
   }
   function render(where, comp) {
@@ -2134,6 +2120,18 @@ var hypersimple = (function (exports) {
     }
 
     return where;
+  }
+  function update(model, changes) {
+    var map = getMap(model);
+    if (!map) throw new Error('unknown model');
+
+    try {
+      sync = false;
+      assign(model, changes);
+    } finally {
+      sync = true;
+      map.forEach(updateComponent, model);
+    }
   }
 
   function getInfo(model, comp, Component, id, args) {
@@ -2158,7 +2156,7 @@ var hypersimple = (function (exports) {
   function setMap(model) {
     var map = new Map$1();
     store.set(model, map);
-    wrap(model, updateAll);
+    augment(model, updateAll);
     return map;
   }
 
@@ -2167,7 +2165,7 @@ var hypersimple = (function (exports) {
   }
 
   function updateComponent(info) {
-    update(this, info.Component, info.id, info.args);
+    refresh(this, info.Component, info.id, info.args);
   }
 
   exports.comp = comp;
@@ -2175,6 +2173,7 @@ var hypersimple = (function (exports) {
   exports.html = html;
   exports.render = render;
   exports.svg = svg;
+  exports.update = update;
 
   return exports;
 

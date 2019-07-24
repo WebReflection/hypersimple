@@ -17,11 +17,7 @@ export function svg() {
   return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
 };
 
-export function same(node, i) {
-  return this[i] === node[i];
-};
-
-export function update(model, Component, id, args) {
+export function refresh(model, Component, id, args) {
   var wid = wired.id;
   var wmodel = wired.model;
   wired.id = id;
@@ -35,7 +31,11 @@ export function update(model, Component, id, args) {
   }
 };
 
-export function wrap(model, update) {
+export function same(node, i) {
+  return this[i] === node[i];
+};
+
+export function augment(model, update) {
   keys(model).forEach(function (key) {
     var value, desc = gOPD(model, key);
     if (desc.configurable) {
