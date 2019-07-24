@@ -63,3 +63,8 @@ The `model` _will be modified_ to reflect any change of any of its properties in
 If you use immutable structures, you'll trash the whole layout each time so ... to **keep it simple**, as the project suggest, but also to keep it memory safe, just pass mutable models and update those directly instead of duplicating it.
 
 The whole idea is indeed to abstract away everything that's more complicated than setting, or updating, a generic property.
+
+### TODO
+
+- [ ] relate models to components, so it's possible to use the same model with different components and still ahve the magic happens
+- [ ] evaluate the exposure of `hyperHTML.define(...)` to provide user-defined behaviors too
