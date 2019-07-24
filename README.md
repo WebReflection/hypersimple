@@ -58,8 +58,8 @@ render(document.body, () => App(model));
 
 A component can `Comp.update(model)` to explicitly update some part of the layout, or batch multiple updates at once via `Comp.update(model, {...changes})`.
 
-The `model` _will be modified_ to reflect any change of any of its properties in the UI.
+The `model` _will be modified_ to reflect any change of any of its properties in the UI, and every method will be automatically bound to the related context.
 
-If you use immutable structures, you'll trash the whole layout each time so ... to keep it simple, as the project suggest, but also memory safe, just pass any model you want, and update it right away instead of duplicating it.
+If you use immutable structures, you'll trash the whole layout each time so ... to **keep it simple**, as the project suggest, but also to keep it memory safe, just pass mutable models and update those directly instead of duplicating it.
 
-The whole idea is to abstract away everything that's more complicated than setting, or updating, a property.
+The whole idea is indeed to abstract away everything that's more complicated than setting, or updating, a generic property.

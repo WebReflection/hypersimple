@@ -12,6 +12,10 @@ var props = new WeakMap;
 var store = new WeakMap;
 var wired = {id: 0, props: null};
 
+function bound(value, props) {
+  return typeof value === 'function' ? value.bind(props) : value;
+}
+
 function same(node, i) {
   return this[i] === node[i];
 }
@@ -61,14 +65,14 @@ export function comp(Component) {'use strict';
         var value, desc = gOPD(props, key);
         if (desc.configurable) {
           if ('value' in desc) {
-            value = desc.value;
+            value = bound(desc.value, props);
             delete desc.value;
             delete desc.writable;
             desc.get = function () {
               return value;
             };
             desc.set = function ($) {
-              value = $;
+              value = bound($, props);
               if (sync)
                 update(Component, self, args, id, props);
             };

@@ -1886,6 +1886,10 @@ var hypersimple = (function (exports) {
     props: null
   };
 
+  function bound(value, props) {
+    return typeof value === 'function' ? value.bind(props) : value;
+  }
+
   function same(node, i) {
     return this[i] === node[i];
   }
@@ -1940,7 +1944,7 @@ var hypersimple = (function (exports) {
 
           if (desc.configurable) {
             if ('value' in desc) {
-              value = desc.value;
+              value = bound(desc.value, props);
               delete desc.value;
               delete desc.writable;
 
@@ -1949,7 +1953,7 @@ var hypersimple = (function (exports) {
               };
 
               desc.set = function ($) {
-                value = $;
+                value = bound($, props);
                 if (sync) update(Component, self, args, id, props);
               };
 
