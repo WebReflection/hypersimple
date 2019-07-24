@@ -94,21 +94,15 @@ export function comp(Component) {'use strict';
 };
 
 export function render(where, Component) {
-  var content, comp = comps.get(Component);
-  if (comp) {
-    var p = props.get(where);
-    if (!p) props.set(where, p = {});
-    content = Component(p);
-  }
-  else
-    content = Component();
-  if (
-    (content.nodeType === 1 && where.firstChild === content) ||
-    content.childNodes.every(same, where.childNodes)
-  ) {
-    Component.update(p);
-  }
-  else {
+  var known = comps.has(Component);
+  var content = known ?
+    Component(props.get(where) || props.set(where, {}).get(where)) :
+    Component();
+  var isElement = content.nodeType === 1;
+  if (!(
+    (isElement && where.firstChild === content) ||
+    (!isElement && content.childNodes.every(same, where.childNodes))
+  )) {
     where.textContent = '';
     where.appendChild(content.valueOf(true));
   }
