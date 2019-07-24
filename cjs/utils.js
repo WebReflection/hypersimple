@@ -1,10 +1,76 @@
 'use strict';
-function bound(value, model) {
-  return typeof value === 'function' ? value.bind(model) : value;
+const {define, wire} = require('hyperhtml');
+
+var defineProperty = Object.defineProperty;
+var gOPD = Object.getOwnPropertyDescriptor;
+var keys = Object.keys;
+
+var slice = [].slice;
+var wired = {id: 0, model: null};
+
+exports.define = define;
+exports.slice = slice;
+
+function html() {
+  return wire(wired.model, 'html:' + wired.id).apply(null, arguments);
 }
-exports.bound = bound
+exports.html = html;
+
+function svg() {
+  return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
+}
+exports.svg = svg;
 
 function same(node, i) {
   return this[i] === node[i];
 }
-exports.same = same
+exports.same = same;
+
+function update(model, Component, id, args) {
+  var wid = wired.id;
+  var wmodel = wired.model;
+  wired.id = id;
+  wired.model = model;
+  try {
+    return Component.apply(null, args);
+  }
+  finally {
+    wired.id = wid;
+    wired.model = wmodel;
+  }
+}
+exports.update = update;
+
+function wrap(model, update) {
+  keys(model).forEach(function (key) {
+    var value, desc = gOPD(model, key);
+    if (desc.configurable) {
+      if ('value' in desc) {
+        value = bound(desc.value, model);
+        defineProperty(model, key, {
+          configurable: true,
+          enumerable: true,
+          get: function () {
+            return value;
+          },
+          set: function ($) {
+            value = bound($, model);
+            update(model);
+          }
+        });
+      } else if ('set' in desc) {
+        value = desc.set;
+        desc.set = function ($) {
+          value.call(model, $);
+          update(model);
+        };
+        defineProperty(model, key, desc);
+      }
+    }
+  });
+}
+exports.wrap = wrap;
+
+function bound(value, model) {
+  return typeof value === 'function' ? value.bind(model) : value;
+}

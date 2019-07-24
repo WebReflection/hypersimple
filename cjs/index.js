@@ -1,98 +1,48 @@
 'use strict';
-const {wire} = require('hyperhtml');
 const assign = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/assign'));
 const WeakMap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/weakmap'));
-const {bound, same} = require('./utils.js');
+const Map = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/essential-map'));
+const {define, html, svg, same, slice, update, wrap} = require('./utils.js');
 
-var defineProperty = Object.defineProperty;
-var gOPD = Object.getOwnPropertyDescriptor;
-var keys = Object.keys;
-
-var counter = 0;
 var comps = new WeakMap;
-var model = new WeakMap;
+var param = new WeakMap;
 var store = new WeakMap;
-var wired = {id: 0, model: null};
 
-function update(Component, self, args, id, model) {
-  var wid = wired.id;
-  var wmodel = wired.model;
-  wired.id = id;
-  wired.model = model;
-  try {
-    return Component.apply(self, args);
-  }
-  finally {
-    wired.id = wid;
-    wired.model = wmodel;
-  }
-}
+var ids = 0;
+var sync = true;
 
-function comp(Component) {'use strict';
-  var id = counter++;
-  component.update = function (model, changes) {
-    var update = store.get(model);
-    if (!update)
-      throw new Error('unknown model');
-    update(changes);
-  };
+exports.define = define;
+exports.html = html;
+exports.svg = svg;
+
+function comp(Component) {
+  var id = ++ids;
   comps.set(component, id);
+  component.update = function (model, changes) {
+    var map = getMap(model);
+    if (!map)
+      throw new Error('unknown model');
+    try {
+      sync = false;
+      assign(model, changes);
+    }
+    finally {
+      sync = true;
+      map.forEach(updateComponent, model);
+    }
+  };
   return component;
   function component(model) {
-    if (!model)
-      model = {};
-    var args = arguments;
-    var self = this;
-    var sync = true;
-    if (!store.has(model)) {
-      store.set(model, function (changes) {
-        sync = false;
-        try {
-          assign(model, changes);
-        }
-        finally {
-          sync = true;
-          update(Component, self, args, id, model);
-        }
-      });
-      keys(model).forEach(function (key) {
-        var value, desc = gOPD(model, key);
-        if (desc.configurable) {
-          if ('value' in desc) {
-            value = bound(desc.value, model);
-            delete desc.value;
-            delete desc.writable;
-            desc.get = function () {
-              return value;
-            };
-            desc.set = function ($) {
-              value = bound($, model);
-              if (sync)
-                update(Component, self, args, id, model);
-            };
-            defineProperty(model, key, desc);
-          } else if ('set' in desc) {
-            value = desc.set;
-            desc.set = function ($) {
-              value.call(model, $);
-              if (sync)
-                update(Component, self, args, id, model);
-            };
-            defineProperty(model, key, desc);
-          }
-        }
-      });
-    }
-    return update(Component, self, args, id, model);
+    var info = getInfo(model || {}, component, Component, id, arguments);
+    return update(model, info.Component, info.id, info.args);
   };
 }
 exports.comp = comp;
 
-function render(where, Component) {
-  var known = comps.has(Component);
-  var content = known ?
-    Component(model.get(where) || model.set(where, {}).get(where)) :
-    Component();
+function render(where, comp) {
+  var content = comps.has(comp) ?
+    comp(param.get(where) || param.set(where, {}).get(where)) :
+    comp();
   var isElement = content.nodeType === 1;
   if (!(
     (isElement && where.firstChild === content) ||
@@ -105,12 +55,34 @@ function render(where, Component) {
 }
 exports.render = render;
 
-function html() {
-  return wire(wired.model, 'html:' + wired.id).apply(null, arguments);
+function getInfo(model, comp, Component, id, args) {
+  var map = getMap(model);
+  return map.get(comp) ||
+          setInfo(map, comp, Component, id, slice.call(args, 0));
 }
-exports.html = html;
 
-function svg() {
-  return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
+function getMap(model) {
+  return store.get(model) || setMap(model);
 }
-exports.svg = svg;
+
+function setInfo(map, comp, Component, id, args) {
+  var info = {Component: Component, id: id, args: args};
+  map.set(comp, info);
+  return info;
+}
+
+function setMap(model) {
+  var map = new Map;
+  store.set(model, map);
+  wrap(model, updateAll);
+  return map;
+}
+
+function updateAll(model) {
+  if (sync)
+    getMap(model).forEach(updateComponent, model);
+}
+
+function updateComponent(info) {
+  update(this, info.Component, info.id, info.args);
+}

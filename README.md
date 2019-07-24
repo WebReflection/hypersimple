@@ -52,19 +52,17 @@ render(document.body, () => App(model));
 ## API in a nutshell
 
   * `comp(fn)` returns a component based on some `props` or `model` object
-  * the `fn` _must_ return the result of `html`
-  * `html` is a template literal tag that accepts everything _hyperHTML_ can produce
+  * the `fn` _must_ return the result of `html` or `svg`
+  * `html` and `svg` are a template literal tag that accept everything _hyperHTML_ can produce
   * `render(where, what)` will populate the content of a generic node with whatever a component returns
+  * `define(...)` to enrich _hyperHTML_ potentials [as described in the documentation](https://viperhtml.js.org/hyperhtml/documentation/#api-3)
 
 A component can `Comp.update(model)` to explicitly update some part of the layout, or batch multiple updates at once via `Comp.update(model, {...changes})`.
 
 The `model` _will be modified_ to reflect any change of any of its properties in the UI, and every method will be automatically bound to the related context.
 
+A `model` _can be used with multiple components_ without needing to nest a sub object per each component related to the same model.
+
 If you use immutable structures, you'll trash the whole layout each time so ... to **keep it simple**, as the project suggest, but also to keep it memory safe, just pass mutable models and update those directly instead of duplicating it.
 
 The whole idea is indeed to abstract away everything that's more complicated than setting, or updating, a generic property.
-
-### TODO
-
-- [ ] relate models to components, so it's possible to use the same model with different components still providing same magic
-- [ ] evaluate the exposure of `hyperHTML.define(...)` to provide user-defined behaviors too

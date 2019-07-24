@@ -2,6 +2,19 @@ var hypersimple = (function (exports) {
   'use strict';
 
   /*! (c) Andrea Giammarchi - ISC */
+  var assign = Object.assign || function (target) {
+    for (var o, i = 1; i < arguments.length; i++) {
+      o = arguments[i] || {};
+
+      for (var k in o) {
+        if (o.hasOwnProperty(k)) target[k] = o[k];
+      }
+    }
+
+    return target;
+  };
+
+  /*! (c) Andrea Giammarchi - ISC */
   var self = null ||
   /* istanbul ignore next */
   {};
@@ -60,49 +73,9 @@ var hypersimple = (function (exports) {
   {};
 
   try {
-    self$1.WeakSet = WeakSet;
-  } catch (WeakSet) {
-    (function (id, dP) {
-      var proto = WeakSet.prototype;
-
-      proto.add = function (object) {
-        if (!this.has(object)) dP(object, this._, {
-          value: true,
-          configurable: true
-        });
-        return this;
-      };
-
-      proto.has = function (object) {
-        return this.hasOwnProperty.call(object, this._);
-      };
-
-      proto["delete"] = function (object) {
-        return this.has(object) && delete object[this._];
-      };
-
-      self$1.WeakSet = WeakSet;
-
-      function WeakSet() {
-
-        dP(this, '_', {
-          value: '_@ungap/weakmap' + id++
-        });
-      }
-    })(Math.random(), Object.defineProperty);
-  }
-
-  var WeakSet$1 = self$1.WeakSet;
-
-  /*! (c) Andrea Giammarchi - ISC */
-  var self$2 = null ||
-  /* istanbul ignore next */
-  {};
-
-  try {
-    self$2.Map = Map;
+    self$1.Map = Map;
   } catch (Map) {
-    self$2.Map = function Map() {
+    self$1.Map = function Map() {
       var i = 0;
       var k = [];
       var v = [];
@@ -116,6 +89,11 @@ var hypersimple = (function (exports) {
           }
 
           return had;
+        },
+        forEach: function forEach(callback, context) {
+          k.forEach(function (key, i) {
+            callback.call(context, v[i], key, this);
+          }, this);
         },
         get: function get(key) {
           return contains(key) ? v[i] : void 0;
@@ -136,7 +114,96 @@ var hypersimple = (function (exports) {
     };
   }
 
-  var Map$1 = self$2.Map;
+  var Map$1 = self$1.Map;
+
+  /*! (c) Andrea Giammarchi - ISC */
+  var self$2 = null ||
+  /* istanbul ignore next */
+  {};
+
+  try {
+    self$2.WeakSet = WeakSet;
+  } catch (WeakSet) {
+    (function (id, dP) {
+      var proto = WeakSet.prototype;
+
+      proto.add = function (object) {
+        if (!this.has(object)) dP(object, this._, {
+          value: true,
+          configurable: true
+        });
+        return this;
+      };
+
+      proto.has = function (object) {
+        return this.hasOwnProperty.call(object, this._);
+      };
+
+      proto["delete"] = function (object) {
+        return this.has(object) && delete object[this._];
+      };
+
+      self$2.WeakSet = WeakSet;
+
+      function WeakSet() {
+
+        dP(this, '_', {
+          value: '_@ungap/weakmap' + id++
+        });
+      }
+    })(Math.random(), Object.defineProperty);
+  }
+
+  var WeakSet$1 = self$2.WeakSet;
+
+  /*! (c) Andrea Giammarchi - ISC */
+  var self$3 = null ||
+  /* istanbul ignore next */
+  {};
+
+  try {
+    self$3.Map = Map;
+  } catch (Map) {
+    self$3.Map = function Map() {
+      var i = 0;
+      var k = [];
+      var v = [];
+      return {
+        "delete": function _delete(key) {
+          var had = contains(key);
+
+          if (had) {
+            k.splice(i, 1);
+            v.splice(i, 1);
+          }
+
+          return had;
+        },
+        forEach: function forEach(callback, context) {
+          k.forEach(function (key, i) {
+            callback.call(context, v[i], key, this);
+          }, this);
+        },
+        get: function get(key) {
+          return contains(key) ? v[i] : void 0;
+        },
+        has: function has(key) {
+          return contains(key);
+        },
+        set: function set(key, value) {
+          v[contains(key) ? i : k.push(key) - 1] = value;
+          return this;
+        }
+      };
+
+      function contains(v) {
+        i = k.indexOf(v);
+        return -1 < i;
+      }
+    };
+  }
+
+  var Map$2 = self$3.Map;
 
   var append = function append(get, parent, children, start, end, before) {
     var isSelect = 'selectedIndex' in parent;
@@ -217,7 +284,7 @@ var hypersimple = (function (exports) {
       tresh[i] = currentEnd;
     }
 
-    var keymap = new Map$1();
+    var keymap = new Map$2();
 
     for (var _i = currentStart; _i < currentEnd; _i++) {
       keymap.set(currentNodes[_i], _i);
@@ -358,7 +425,7 @@ var hypersimple = (function (exports) {
   };
 
   var applyDiff = function applyDiff(diff, get, parentNode, futureNodes, futureStart, currentNodes, currentStart, currentLength, before) {
-    var live = new Map$1();
+    var live = new Map$2();
     var length = diff.length;
     var currentIndex = currentStart;
     var i = 0;
@@ -515,10 +582,10 @@ var hypersimple = (function (exports) {
   
 
   /*! (c) Andrea Giammarchi - ISC */
-  var self$3 = null ||
+  var self$4 = null ||
   /* istanbul ignore next */
   {};
-  self$3.CustomEvent = typeof CustomEvent === 'function' ? CustomEvent : function (__p__) {
+  self$4.CustomEvent = typeof CustomEvent === 'function' ? CustomEvent : function (__p__) {
     CustomEvent[__p__] = new CustomEvent('').constructor[__p__];
     return CustomEvent;
 
@@ -529,7 +596,56 @@ var hypersimple = (function (exports) {
       return e;
     }
   }('prototype');
-  var CustomEvent$1 = self$3.CustomEvent;
+  var CustomEvent$1 = self$4.CustomEvent;
+
+  /*! (c) Andrea Giammarchi - ISC */
+  var self$5 = null ||
+  /* istanbul ignore next */
+  {};
+
+  try {
+    self$5.Map = Map;
+  } catch (Map) {
+    self$5.Map = function Map() {
+      var i = 0;
+      var k = [];
+      var v = [];
+      return {
+        "delete": function _delete(key) {
+          var had = contains(key);
+
+          if (had) {
+            k.splice(i, 1);
+            v.splice(i, 1);
+          }
+
+          return had;
+        },
+        forEach: function forEach(callback, context) {
+          k.forEach(function (key, i) {
+            callback.call(context, v[i], key, this);
+          }, this);
+        },
+        get: function get(key) {
+          return contains(key) ? v[i] : void 0;
+        },
+        has: function has(key) {
+          return contains(key);
+        },
+        set: function set(key, value) {
+          v[contains(key) ? i : k.push(key) - 1] = value;
+          return this;
+        }
+      };
+
+      function contains(v) {
+        i = k.indexOf(v);
+        return -1 < i;
+      }
+    };
+  }
+
+  var Map$3 = self$5.Map;
 
   // able to create Custom Elements like components
   // including the ability to listen to connect/disconnect
@@ -580,7 +696,7 @@ var hypersimple = (function (exports) {
     };
 
     var set = function set(context) {
-      var info = new Map$1();
+      var info = new Map$3();
       children.set(context, info);
       return info;
     }; // The Component Class
@@ -965,6 +1081,55 @@ var hypersimple = (function (exports) {
     return VOID_ELEMENTS.test($1) ? $0 : '<' + $1 + $2 + '></' + $1 + '>';
   }
 
+  /*! (c) Andrea Giammarchi - ISC */
+  var self$6 = null ||
+  /* istanbul ignore next */
+  {};
+
+  try {
+    self$6.Map = Map;
+  } catch (Map) {
+    self$6.Map = function Map() {
+      var i = 0;
+      var k = [];
+      var v = [];
+      return {
+        "delete": function _delete(key) {
+          var had = contains(key);
+
+          if (had) {
+            k.splice(i, 1);
+            v.splice(i, 1);
+          }
+
+          return had;
+        },
+        forEach: function forEach(callback, context) {
+          k.forEach(function (key, i) {
+            callback.call(context, v[i], key, this);
+          }, this);
+        },
+        get: function get(key) {
+          return contains(key) ? v[i] : void 0;
+        },
+        has: function has(key) {
+          return contains(key);
+        },
+        set: function set(key, value) {
+          v[contains(key) ? i : k.push(key) - 1] = value;
+          return this;
+        }
+      };
+
+      function contains(v) {
+        i = k.indexOf(v);
+        return -1 < i;
+      }
+    };
+  }
+
+  var Map$4 = self$6.Map;
+
   function find(node, path) {
     var length = path.length;
     var i = 0;
@@ -1035,7 +1200,7 @@ var hypersimple = (function (exports) {
   }
 
   function parseAttributes(node, holes, parts, path) {
-    var cache = new Map$1();
+    var cache = new Map$4();
     var attributes = node.attributes;
     var remove = [];
     var array = remove.slice.call(attributes, 0);
@@ -1857,126 +2022,110 @@ var hypersimple = (function (exports) {
   var bewitched = new WeakMap$1(); // better known as hyper.bind(node), the render is
 
   /*! (c) Andrea Giammarchi (ISC) */
+
+  var define = Intent.define;
   // html or svg property of each hyper.Component
 
   setup(content); // everything is exported directly or through the
 
-  /*! (c) Andrea Giammarchi - ISC */
-  var assign = Object.assign || function (target) {
-    for (var o, i = 1; i < arguments.length; i++) {
-      o = arguments[i] || {};
-
-      for (var k in o) {
-        if (o.hasOwnProperty(k)) target[k] = o[k];
-      }
-    }
-
-    return target;
-  };
-
-  function bound(value, model) {
-    return typeof value === 'function' ? value.bind(model) : value;
-  }
-  function same(node, i) {
-    return this[i] === node[i];
-  }
-
   var defineProperty = Object.defineProperty;
   var gOPD = Object.getOwnPropertyDescriptor;
   var keys$1 = Object.keys;
-  var counter = 0;
-  var comps = new WeakMap$1();
-  var model = new WeakMap$1();
-  var store = new WeakMap$1();
+  var slice$1 = [].slice;
   var wired = {
     id: 0,
     model: null
   };
-
-  function update(Component, self, args, id, model) {
+  function html() {
+    return wire(wired.model, 'html:' + wired.id).apply(null, arguments);
+  }
+  function svg() {
+    return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
+  }
+  function same(node, i) {
+    return this[i] === node[i];
+  }
+  function update(model, Component, id, args) {
     var wid = wired.id;
     var wmodel = wired.model;
     wired.id = id;
     wired.model = model;
 
     try {
-      return Component.apply(self, args);
+      return Component.apply(null, args);
     } finally {
       wired.id = wid;
       wired.model = wmodel;
     }
   }
+  function wrap(model, update) {
+    keys$1(model).forEach(function (key) {
+      var value,
+          desc = gOPD(model, key);
 
+      if (desc.configurable) {
+        if ('value' in desc) {
+          value = bound(desc.value, model);
+          defineProperty(model, key, {
+            configurable: true,
+            enumerable: true,
+            get: function get() {
+              return value;
+            },
+            set: function set($) {
+              value = bound($, model);
+              update(model);
+            }
+          });
+        } else if ('set' in desc) {
+          value = desc.set;
+
+          desc.set = function ($) {
+            value.call(model, $);
+            update(model);
+          };
+
+          defineProperty(model, key, desc);
+        }
+      }
+    });
+  }
+
+  function bound(value, model) {
+    return typeof value === 'function' ? value.bind(model) : value;
+  }
+
+  var comps = new WeakMap$1();
+  var param = new WeakMap$1();
+  var store = new WeakMap$1();
+  var ids = 0;
+  var sync = true;
   function comp(Component) {
-
-    var id = counter++;
+    var id = ++ids;
+    comps.set(component, id);
 
     component.update = function (model, changes) {
-      var update = store.get(model);
-      if (!update) throw new Error('unknown model');
-      update(changes);
+      var map = getMap(model);
+      if (!map) throw new Error('unknown model');
+
+      try {
+        sync = false;
+        assign(model, changes);
+      } finally {
+        sync = true;
+        map.forEach(updateComponent, model);
+      }
     };
 
-    comps.set(component, id);
     return component;
 
     function component(model) {
-      if (!model) model = {};
-      var args = arguments;
-      var self = this;
-      var sync = true;
-
-      if (!store.has(model)) {
-        store.set(model, function (changes) {
-          sync = false;
-
-          try {
-            assign(model, changes);
-          } finally {
-            sync = true;
-            update(Component, self, args, id, model);
-          }
-        });
-        keys$1(model).forEach(function (key) {
-          var value,
-              desc = gOPD(model, key);
-
-          if (desc.configurable) {
-            if ('value' in desc) {
-              value = bound(desc.value, model);
-              delete desc.value;
-              delete desc.writable;
-
-              desc.get = function () {
-                return value;
-              };
-
-              desc.set = function ($) {
-                value = bound($, model);
-                if (sync) update(Component, self, args, id, model);
-              };
-
-              defineProperty(model, key, desc);
-            } else if ('set' in desc) {
-              value = desc.set;
-
-              desc.set = function ($) {
-                value.call(model, $);
-                if (sync) update(Component, self, args, id, model);
-              };
-
-              defineProperty(model, key, desc);
-            }
-          }
-        });
-      }
-
-      return update(Component, self, args, id, model);
+      var info = getInfo(model || {}, component, Component, id, arguments);
+      return update(model, info.Component, info.id, info.args);
     }
   }
-  function render(where, Component) {
-    var known = comps.has(Component);
-    var content = known ? Component(model.get(where) || model.set(where, {}).get(where)) : Component();
+  function render(where, comp) {
+    var content = comps.has(comp) ? comp(param.get(where) || param.set(where, {}).get(where)) : comp();
     var isElement = content.nodeType === 1;
 
     if (!(isElement && where.firstChild === content || !isElement && content.childNodes.every(same, where.childNodes))) {
@@ -1986,14 +2135,43 @@ var hypersimple = (function (exports) {
 
     return where;
   }
-  function html() {
-    return wire(wired.model, 'html:' + wired.id).apply(null, arguments);
+
+  function getInfo(model, comp, Component, id, args) {
+    var map = getMap(model);
+    return map.get(comp) || setInfo(map, comp, Component, id, slice$1.call(args, 0));
   }
-  function svg() {
-    return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
+
+  function getMap(model) {
+    return store.get(model) || setMap(model);
+  }
+
+  function setInfo(map, comp, Component, id, args) {
+    var info = {
+      Component: Component,
+      id: id,
+      args: args
+    };
+    map.set(comp, info);
+    return info;
+  }
+
+  function setMap(model) {
+    var map = new Map$1();
+    store.set(model, map);
+    wrap(model, updateAll);
+    return map;
+  }
+
+  function updateAll(model) {
+    if (sync) getMap(model).forEach(updateComponent, model);
+  }
+
+  function updateComponent(info) {
+    update(this, info.Component, info.id, info.args);
   }
 
   exports.comp = comp;
+  exports.define = define;
   exports.html = html;
   exports.render = render;
   exports.svg = svg;

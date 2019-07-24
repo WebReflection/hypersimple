@@ -20,17 +20,15 @@
     const App = comp(model => html`
       Lorem ipsum: ${model.count}
       <br>
-      ${Button(model.button)}
+      ${Button(model)}
     `);
 
     // model: it will be mutated to trigger updates on changes
     const model = {
       count: 0,
-      button: {
-        text: 'increment',
-        onclick() {
-          model.count += 1;
-        }
+      text: 'increment',
+      onclick() {
+        this.count++;
       }
     };
 

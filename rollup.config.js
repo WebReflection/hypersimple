@@ -3,7 +3,7 @@ import resolve from 'rollup-plugin-node-resolve';
 export default {
   input: 'esm/index.js',
   plugins: [
-    resolve(),
+    resolve({module: true}),
     babel({
       runtimeHelpers: true,
       presets: ['@babel/preset-env']
