@@ -4,10 +4,11 @@ var defineProperty = Object.defineProperty;
 var gOPD = Object.getOwnPropertyDescriptor;
 var keys = Object.keys;
 
+var hOP = {}.hasOwnProperty;
 var slice = [].slice;
 var wired = {id: 0, model: null};
 
-export {define, slice};
+export {define, hOP, slice};
 
 export function html() {
   return wire(wired.model, 'html:' + wired.id).apply(null, arguments);
@@ -15,6 +16,23 @@ export function html() {
 
 export function svg() {
   return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
+};
+
+export function merge(model, changes) {
+  for (var key in changes) {
+    if (hOP.call(changes, key)) {
+      var value = changes[key];
+      if (
+        hOP.call(model, key) &&
+        typeof value === "object" &&
+        value !== null
+      ) {
+        merge(model[key], value);
+      }
+      else
+        model[key] = value;
+    }
+  }
 };
 
 export function refresh(model, Component, id, args) {

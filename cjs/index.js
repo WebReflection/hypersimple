@@ -2,7 +2,9 @@
 const assign = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/assign'));
 const WeakMap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/weakmap'));
 const Map = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/essential-map'));
-const {augment, define, html, svg, same, slice, refresh} = require('./utils.js');
+const {
+  augment, define, merge, refresh, same, hOP, slice, html, svg
+} = require('./utils.js');
 
 var comps = new WeakMap;
 var param = new WeakMap;
@@ -51,9 +53,9 @@ function update(model, changes) {
   var map = store.get(model);
   if (!map)
     throw new Error('unknown model');
+  sync = false;
   try {
-    sync = false;
-    assign(model, changes);
+    merge(model, changes || {});
   }
   finally {
     sync = true;

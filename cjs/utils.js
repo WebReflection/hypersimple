@@ -5,10 +5,12 @@ var defineProperty = Object.defineProperty;
 var gOPD = Object.getOwnPropertyDescriptor;
 var keys = Object.keys;
 
+var hOP = {}.hasOwnProperty;
 var slice = [].slice;
 var wired = {id: 0, model: null};
 
 exports.define = define;
+exports.hOP = hOP;
 exports.slice = slice;
 
 function html() {
@@ -20,6 +22,24 @@ function svg() {
   return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
 }
 exports.svg = svg;
+
+function merge(model, changes) {
+  for (var key in changes) {
+    if (hOP.call(changes, key)) {
+      var value = changes[key];
+      if (
+        hOP.call(model, key) &&
+        typeof value === "object" &&
+        value !== null
+      ) {
+        merge(model[key], value);
+      }
+      else
+        model[key] = value;
+    }
+  }
+}
+exports.merge = merge;
 
 function refresh(model, Component, id, args) {
   var wid = wired.id;

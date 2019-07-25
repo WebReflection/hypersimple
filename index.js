@@ -2,19 +2,6 @@ var hypersimple = (function (exports) {
   'use strict';
 
   /*! (c) Andrea Giammarchi - ISC */
-  var assign = Object.assign || function (target) {
-    for (var o, i = 1; i < arguments.length; i++) {
-      o = arguments[i] || {};
-
-      for (var k in o) {
-        if (o.hasOwnProperty(k)) target[k] = o[k];
-      }
-    }
-
-    return target;
-  };
-
-  /*! (c) Andrea Giammarchi - ISC */
   var self = null ||
   /* istanbul ignore next */
   {};
@@ -115,6 +102,8 @@ var hypersimple = (function (exports) {
   }
 
   var Map$1 = self$1.Map;
+
+  
 
   /*! (c) Andrea Giammarchi - ISC */
   var self$2 = null ||
@@ -578,8 +567,6 @@ var hypersimple = (function (exports) {
     smartDiff(get, parentNode, futureNodes, futureStart, futureEnd, futureChanges, currentNodes, currentStart, currentEnd, currentChanges, currentLength, compare, before);
     return futureNodes;
   };
-
-  
 
   /*! (c) Andrea Giammarchi - ISC */
   var self$4 = null ||
@@ -2031,6 +2018,7 @@ var hypersimple = (function (exports) {
   var defineProperty = Object.defineProperty;
   var gOPD = Object.getOwnPropertyDescriptor;
   var keys$1 = Object.keys;
+  var hOP = {}.hasOwnProperty;
   var slice$1 = [].slice;
   var wired = {
     id: 0,
@@ -2041,6 +2029,17 @@ var hypersimple = (function (exports) {
   }
   function svg() {
     return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
+  }
+  function merge(model, changes) {
+    for (var key in changes) {
+      if (hOP.call(changes, key)) {
+        var value = changes[key];
+
+        if (hOP.call(model, key) && typeof(value) === "object" && value !== null) {
+          merge(model[key], value);
+        } else model[key] = value;
+      }
+    }
   }
   function refresh(model, Component, id, args) {
     var wid = wired.id;
@@ -2125,10 +2124,10 @@ var hypersimple = (function (exports) {
   function update(model, changes) {
     var map = store.get(model);
     if (!map) throw new Error('unknown model');
+    sync = false;
 
     try {
-      sync = false;
-      assign(model, changes);
+      merge(model, changes || {});
     } finally {
       sync = true;
       map.forEach(updateComponent, model);

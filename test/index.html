@@ -6,7 +6,7 @@
   <title>hypersimple</title>
   <script src="../index.js"></script>
   <script>
-  const {comp, html, render} = hypersimple;
+  const {comp, html, render, update} = hypersimple;
   this.onload = () => {
 
     // components
@@ -24,16 +24,33 @@
     `);
 
     // model: it will be mutated to trigger updates on changes
+    const arr = [1, 2, 3];
     const model = {
       count: 0,
       text: 'increment',
       onclick() {
         this.count++;
+      },
+      some: {
+        nested: {
+          value: arr
+        }
       }
     };
 
     // render
     render(document.body, () => App(model));
+
+    setTimeout(() => {
+      update(model, {
+        some: {
+          nested: {
+            value: [1, 4, 3]
+          }
+        }
+      });
+      console.log(model.some.nested.value === arr, arr);
+    }, 1000);
   };
   </script>
 </head>

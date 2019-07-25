@@ -1,7 +1,11 @@
 import assign from '@ungap/assign';
 import WeakMap from '@ungap/weakmap';
 import Map from '@ungap/essential-map';
-import {augment, define, html, svg, same, slice, refresh} from './utils.js';
+import {
+  augment, define, merge, refresh, same,
+  hOP, slice,
+  html, svg
+} from './utils.js';
 
 var comps = new WeakMap;
 var param = new WeakMap;
@@ -46,9 +50,9 @@ export function update(model, changes) {
   var map = store.get(model);
   if (!map)
     throw new Error('unknown model');
+  sync = false;
   try {
-    sync = false;
-    assign(model, changes);
+    merge(model, changes || {});
   }
   finally {
     sync = true;
