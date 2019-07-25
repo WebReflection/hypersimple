@@ -2023,40 +2023,14 @@ var hypersimple = (function (exports) {
   var wired = {
     id: 0,
     model: null
-  };
+  }; // hyper utilities
   function html() {
     return wire(wired.model, 'html:' + wired.id).apply(null, arguments);
   }
   function svg() {
     return wire(wired.model, 'svg:' + wired.id).apply(null, arguments);
   }
-  function merge(model, changes) {
-    for (var key in changes) {
-      if (hOP.call(changes, key)) {
-        var value = changes[key];
 
-        if (hOP.call(model, key) && typeof(value) === "object" && value !== null) {
-          merge(model[key], value);
-        } else model[key] = value;
-      }
-    }
-  }
-  function refresh(model, Component, id, args) {
-    var wid = wired.id;
-    var wmodel = wired.model;
-    wired.id = id;
-    wired.model = model;
-
-    try {
-      return Component.apply(null, args);
-    } finally {
-      wired.id = wid;
-      wired.model = wmodel;
-    }
-  }
-  function same(node, i) {
-    return this[i] === node[i];
-  }
   function augment(model, update) {
     keys$1(model).forEach(function (key) {
       var value,
@@ -2089,9 +2063,93 @@ var hypersimple = (function (exports) {
       }
     });
   }
+  function merge(model, changes) {
+    for (var key in changes) {
+      if (hOP.call(changes, key)) {
+        var has = hOP.call(model, key);
+        var curr = changes[key];
+        var prev = has ? model[key] : null;
+        if (has && curr !== null && typeof(curr) === "object") merge(prev, curr);else if (!has || curr !== prev) model[key] = curr;
+      }
+    }
+  }
+  function refresh(model, Component, id, args) {
+    var wid = wired.id;
+    var wmodel = wired.model;
+    wired.id = id;
+    wired.model = model;
+
+    try {
+      return Component.apply(null, args);
+    } finally {
+      wired.id = wid;
+      wired.model = wmodel;
+    }
+  }
+  function same(node, i) {
+    return this[i] === node[i];
+  }
 
   function bound(value, model) {
     return typeof value === 'function' ? value.bind(model) : value;
+  }
+
+  /**
+   * Copyright (C) 2017-present by Andrea Giammarchi - @WebReflection
+   *
+   * Permission is hereby granted, free of charge, to any person obtaining a copy
+   * of this software and associated documentation files (the "Software"), to deal
+   * in the Software without restriction, including without limitation the rights
+   * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   * copies of the Software, and to permit persons to whom the Software is
+   * furnished to do so, subject to the following conditions:
+   *
+   * The above copyright notice and this permission notice shall be included in
+   * all copies or substantial portions of the Software.
+   *
+   * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+   * THE SOFTWARE.
+   */
+  var replace = ''.replace;
+  var ca = /[&<>'"]/g;
+  var es = /&(?:amp|#38|lt|#60|gt|#62|apos|#39|quot|#34);/g;
+  var esca = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  };
+  var unes = {
+    '&amp;': '&',
+    '&#38;': '&',
+    '&lt;': '<',
+    '&#60;': '<',
+    '&gt;': '>',
+    '&#62;': '>',
+    '&apos;': "'",
+    '&#39;': "'",
+    '&quot;': '"',
+    '&#34;': '"'
+  };
+  function escape(es) {
+    return replace.call(es, ca, pe);
+  }
+  function unescape(un) {
+    return replace.call(un, es, cape);
+  }
+
+  function pe(m) {
+    return esca[m];
+  }
+
+  function cape(m) {
+    return unes[m];
   }
 
   var comps = new WeakMap$1();
@@ -2167,9 +2225,11 @@ var hypersimple = (function (exports) {
 
   exports.comp = comp;
   exports.define = define;
+  exports.escape = escape;
   exports.html = html;
   exports.render = render;
   exports.svg = svg;
+  exports.unescape = unescape;
   exports.update = update;
 
   return exports;

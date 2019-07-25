@@ -1,10 +1,8 @@
-import assign from '@ungap/assign';
 import WeakMap from '@ungap/weakmap';
 import Map from '@ungap/essential-map';
 import {
-  augment, define, merge, refresh, same,
-  hOP, slice,
-  html, svg
+  define, html, svg,
+  augment, merge, refresh, same, slice
 } from './utils.js';
 
 var comps = new WeakMap;
@@ -14,6 +12,7 @@ var store = new WeakMap;
 var ids = 0;
 var sync = true;
 
+export {escape, unescape} from 'html-escaper';
 export {define, html, svg};
 
 export function comp(Component) {

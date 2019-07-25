@@ -6,7 +6,7 @@
   <title>hypersimple</title>
   <script src="../index.js"></script>
   <script>
-  const {comp, html, render, update} = hypersimple;
+  const {comp, escape, html, render, update} = hypersimple;
   this.onload = () => {
 
     // components
@@ -16,11 +16,17 @@
       </button>
     `);
 
+    const Span = comp(model => html`${
+      model.map(v => `<span>${escape(v)}</span>`)
+    }`);
+
     // main App: just like any component
     const App = comp(model => html`
       Lorem ipsum: ${model.count}
       <br>
       ${Button(model)}
+      <br>
+      ${Span(model.some.nested.value)}
     `);
 
     // model: it will be mutated to trigger updates on changes
@@ -41,16 +47,13 @@
     // render
     render(document.body, () => App(model));
 
-    setTimeout(() => {
-      update(model, {
-        some: {
-          nested: {
-            value: [1, 4, 3]
-          }
+    setTimeout(update, 1000, model, {
+      some: {
+        nested: {
+          value: [1, 4, 3]
         }
-      });
-      console.log(model.some.nested.value === arr, arr);
-    }, 1000);
+      }
+    });
   };
   </script>
 </head>

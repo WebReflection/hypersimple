@@ -21,9 +21,9 @@
   "author": "Andrea Giammarchi",
   "license": "ISC",
   "dependencies": {
-    "@ungap/assign": "^0.1.0",
     "@ungap/essential-map": "^0.2.0",
     "@ungap/weakmap": "^0.1.4",
+    "html-escaper": "^2.0.0",
     "hyperhtml": "^2.30.1"
   },
   "devDependencies": {

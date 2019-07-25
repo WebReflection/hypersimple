@@ -9,9 +9,8 @@ var hOP = {}.hasOwnProperty;
 var slice = [].slice;
 var wired = {id: 0, model: null};
 
+// hyper utilities
 exports.define = define;
-exports.hOP = hOP;
-exports.slice = slice;
 
 function html() {
   return wire(wired.model, 'html:' + wired.id).apply(null, arguments);
@@ -23,44 +22,7 @@ function svg() {
 }
 exports.svg = svg;
 
-function merge(model, changes) {
-  for (var key in changes) {
-    if (hOP.call(changes, key)) {
-      var value = changes[key];
-      if (
-        hOP.call(model, key) &&
-        typeof value === "object" &&
-        value !== null
-      ) {
-        merge(model[key], value);
-      }
-      else
-        model[key] = value;
-    }
-  }
-}
-exports.merge = merge;
-
-function refresh(model, Component, id, args) {
-  var wid = wired.id;
-  var wmodel = wired.model;
-  wired.id = id;
-  wired.model = model;
-  try {
-    return Component.apply(null, args);
-  }
-  finally {
-    wired.id = wid;
-    wired.model = wmodel;
-  }
-}
-exports.refresh = refresh;
-
-function same(node, i) {
-  return this[i] === node[i];
-}
-exports.same = same;
-
+// extra utilities
 function augment(model, update) {
   keys(model).forEach(function (key) {
     var value, desc = gOPD(model, key);
@@ -90,6 +52,43 @@ function augment(model, update) {
   });
 }
 exports.augment = augment;
+
+function merge(model, changes) {
+  for (var key in changes) {
+    if (hOP.call(changes, key)) {
+      var has = hOP.call(model, key);
+      var curr = changes[key];
+      var prev = has ? model[key] : null;
+      if (has && curr !== null && typeof curr === "object")
+        merge(prev, curr);
+      else if (!has || curr !== prev)
+        model[key] = curr;
+    }
+  }
+}
+exports.merge = merge;
+
+function refresh(model, Component, id, args) {
+  var wid = wired.id;
+  var wmodel = wired.model;
+  wired.id = id;
+  wired.model = model;
+  try {
+    return Component.apply(null, args);
+  }
+  finally {
+    wired.id = wid;
+    wired.model = wmodel;
+  }
+}
+exports.refresh = refresh;
+
+function same(node, i) {
+  return this[i] === node[i];
+}
+exports.same = same;
+
+exports.slice = slice;
 
 function bound(value, model) {
   return typeof value === 'function' ? value.bind(model) : value;

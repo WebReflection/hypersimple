@@ -1,9 +1,8 @@
 'use strict';
-const assign = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/assign'));
 const WeakMap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/weakmap'));
 const Map = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/essential-map'));
 const {
-  augment, define, merge, refresh, same, hOP, slice, html, svg
+  define, html, svg, augment, merge, refresh, same, slice
 } = require('./utils.js');
 
 var comps = new WeakMap;
@@ -13,6 +12,10 @@ var store = new WeakMap;
 var ids = 0;
 var sync = true;
 
+(m => {
+  exports.escape = m.escape;
+  exports.unescape = m.unescape;
+})(require('html-escaper'));
 exports.define = define;
 exports.html = html;
 exports.svg = svg;
