@@ -17,8 +17,13 @@ export function comp(Component) {
   comps.set(component, id);
   return component;
   function component(model) {
-    var info = getInfo(model || {}, component, Component, id, arguments);
-    return refresh(model, info.Component, info.id, info.args);
+    var mod = model || {};
+    var map = store.get(mod) || setMap(mod);
+    return updateComponent.call(
+      mod,
+      map.get(component) ||
+      setInfo(map, component, Component, id, slice.call(arguments, 0))
+    );
   };
 };
 
@@ -38,7 +43,7 @@ export function render(where, comp) {
 };
 
 export function update(model, changes) {
-  var map = getMap(model);
+  var map = store.get(model);
   if (!map)
     throw new Error('unknown model');
   try {
@@ -50,16 +55,6 @@ export function update(model, changes) {
     map.forEach(updateComponent, model);
   }
 };
-
-function getInfo(model, comp, Component, id, args) {
-  var map = getMap(model);
-  return map.get(comp) ||
-          setInfo(map, comp, Component, id, slice.call(args, 0));
-}
-
-function getMap(model) {
-  return store.get(model) || setMap(model);
-}
 
 function setInfo(map, comp, Component, id, args) {
   var info = {Component: Component, id: id, args: args};
@@ -76,9 +71,9 @@ function setMap(model) {
 
 function updateAll(model) {
   if (sync)
-    getMap(model).forEach(updateComponent, model);
+    store.get(model).forEach(updateComponent, model);
 }
 
 function updateComponent(info) {
-  refresh(this, info.Component, info.id, info.args);
+  return refresh(this, info.Component, info.id, info.args);
 }

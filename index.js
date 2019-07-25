@@ -2106,8 +2106,9 @@ var hypersimple = (function (exports) {
     return component;
 
     function component(model) {
-      var info = getInfo(model || {}, component, Component, id, arguments);
-      return refresh(model, info.Component, info.id, info.args);
+      var mod = model || {};
+      var map = store.get(mod) || setMap(mod);
+      return updateComponent.call(mod, map.get(component) || setInfo(map, component, Component, id, slice$1.call(arguments, 0)));
     }
   }
   function render(where, comp) {
@@ -2122,7 +2123,7 @@ var hypersimple = (function (exports) {
     return where;
   }
   function update(model, changes) {
-    var map = getMap(model);
+    var map = store.get(model);
     if (!map) throw new Error('unknown model');
 
     try {
@@ -2132,15 +2133,6 @@ var hypersimple = (function (exports) {
       sync = true;
       map.forEach(updateComponent, model);
     }
-  }
-
-  function getInfo(model, comp, Component, id, args) {
-    var map = getMap(model);
-    return map.get(comp) || setInfo(map, comp, Component, id, slice$1.call(args, 0));
-  }
-
-  function getMap(model) {
-    return store.get(model) || setMap(model);
   }
 
   function setInfo(map, comp, Component, id, args) {
@@ -2161,11 +2153,11 @@ var hypersimple = (function (exports) {
   }
 
   function updateAll(model) {
-    if (sync) getMap(model).forEach(updateComponent, model);
+    if (sync) store.get(model).forEach(updateComponent, model);
   }
 
   function updateComponent(info) {
-    refresh(this, info.Component, info.id, info.args);
+    return refresh(this, info.Component, info.id, info.args);
   }
 
   exports.comp = comp;
