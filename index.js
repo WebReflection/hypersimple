@@ -2112,7 +2112,7 @@ var hypersimple = (function (exports) {
     }
   }
   function render(where, comp) {
-    var content = comps.has(comp) ? comp(param.get(where) || param.set(where, {}).get(where)) : comp();
+    var content = comps.has(comp) ? comp(param.get(where) || setParam(where)) : comp();
     var isElement = content.nodeType === 1;
 
     if (!(isElement && where.firstChild === content || !isElement && content.childNodes.every(same, where.childNodes))) {
@@ -2150,6 +2150,12 @@ var hypersimple = (function (exports) {
     store.set(model, map);
     augment(model, updateAll);
     return map;
+  }
+
+  function setParam(where) {
+    var model = {};
+    param.set(where, model);
+    return model;
   }
 
   function updateAll(model) {

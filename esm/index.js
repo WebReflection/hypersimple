@@ -29,7 +29,7 @@ export function comp(Component) {
 
 export function render(where, comp) {
   var content = comps.has(comp) ?
-    comp(param.get(where) || param.set(where, {}).get(where)) :
+    comp(param.get(where) || setParam(where)) :
     comp();
   var isElement = content.nodeType === 1;
   if (!(
@@ -67,6 +67,12 @@ function setMap(model) {
   store.set(model, map);
   augment(model, updateAll);
   return map;
+}
+
+function setParam(where) {
+  var model = {};
+  param.set(where, model);
+  return model;
 }
 
 function updateAll(model) {
